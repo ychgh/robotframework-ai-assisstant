@@ -33,12 +33,12 @@ The Robot Framework AI Assistant now supports multiple LLM providers through a f
 │  └────────────────────────────────────┘  │
 └──────────────┬───────────────────────────┘
                │
-       ┌───────┴───────┬──────────┬──────────┬──────────┐
-       ▼               ▼          ▼          ▼          ▼
-┌──────────┐    ┌──────────┐ ┌────────┐ ┌────────┐ ┌────────┐
-│ OpenAI   │    │Anthropic │ │ Google │ │ Azure  │ │Ollama  │
-│Provider  │    │Provider  │ │Provider│ │Provider│ │Provider│
-└──────────┘    └──────────┘ └────────┘ └────────┘ └────────┘
+       ┌───────┴───────┬──────────┬──────────┬──────────┬──────────┬──────────┐
+       ▼               ▼          ▼          ▼          ▼          ▼          ▼
+┌──────────┐    ┌──────────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
+│ OpenAI   │    │Anthropic │ │ Google │ │ Azure  │ │Ollama  │ │DeepSeek│ │ Qwen   │
+│Provider  │    │Provider  │ │Provider│ │Provider│ │Provider│ │Provider│ │Provider│
+└──────────┘    └──────────┘ └────────┘ └────────┘ └────────┘ └────────┘ └────────┘
 ```
 
 ## Supported Providers
@@ -68,6 +68,18 @@ The Robot Framework AI Assistant now supports multiple LLM providers through a f
 - **Environment Variable**: Not required
 - **Installation**: Built-in (langchain-community)
 - **Requirements**: Ollama server running on http://localhost:11434
+
+### 6. DeepSeek
+- **Models**: deepseek-chat, deepseek-coder
+- **Environment Variable**: `DEEPSEEK_API_KEY`
+- **Installation**: Built-in (langchain-openai)
+- **API Endpoint**: https://api.deepseek.com/v1
+
+### 7. Qwen (Alibaba Cloud)
+- **Models**: qwen-turbo, qwen-plus, qwen-max
+- **Environment Variable**: `DASHSCOPE_API_KEY`
+- **Installation**: Built-in (langchain-openai)
+- **API Endpoint**: https://dashscope.aliyuncs.com/compatible-mode/v1
 
 ## Usage Examples
 
@@ -99,6 +111,16 @@ Library    AIAssistantLibrary
 Library    AIAssistantLibrary
 ...        provider=ollama
 ...        model_name=llama2
+
+# DeepSeek
+Library    AIAssistantLibrary
+...        provider=deepseek
+...        model_name=deepseek-chat
+
+# Qwen (Alibaba Cloud)
+Library    AIAssistantLibrary
+...        provider=qwen
+...        model_name=qwen-turbo
 ```
 
 ### Python API
@@ -124,6 +146,23 @@ service = AIService(
     provider="azure",
     model_name="my-deployment",
     azure_endpoint="https://my-resource.openai.azure.com"
+)
+
+# Ollama
+service = AIService(provider="ollama", model_name="llama2")
+
+# DeepSeek
+service = AIService(
+    provider="deepseek",
+    model_name="deepseek-chat",
+    api_key="your-key"
+)
+
+# Qwen
+service = AIService(
+    provider="qwen",
+    model_name="qwen-turbo",
+    api_key="your-dashscope-key"
 )
 
 # Ollama
@@ -154,6 +193,18 @@ rf-ai-server
 # Ollama
 export LLM_PROVIDER=ollama
 export LLM_MODEL=llama2
+rf-ai-server
+
+# DeepSeek
+export LLM_PROVIDER=deepseek
+export LLM_MODEL=deepseek-chat
+export DEEPSEEK_API_KEY=your-key
+rf-ai-server
+
+# Qwen
+export LLM_PROVIDER=qwen
+export LLM_MODEL=qwen-turbo
+export DASHSCOPE_API_KEY=your-key
 rf-ai-server
 ```
 

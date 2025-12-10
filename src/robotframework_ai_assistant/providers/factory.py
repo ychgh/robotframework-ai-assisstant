@@ -32,7 +32,7 @@ class LLMProviderFactory:
         """Create a provider instance.
 
         Args:
-            provider: Provider name ('openai', 'anthropic', 'google', 'azure', 'ollama').
+            provider: Provider name ('openai', 'anthropic', 'google', 'azure', 'ollama', 'deepseek', 'qwen').
             model_name: Model name.
             temperature: Temperature for generation.
             api_key: API key for the provider.
@@ -73,15 +73,19 @@ class LLMProviderFactory:
         # Import and register default providers
         from robotframework_ai_assistant.providers.anthropic_provider import AnthropicProvider
         from robotframework_ai_assistant.providers.azure_provider import AzureOpenAIProvider
+        from robotframework_ai_assistant.providers.deepseek_provider import DeepSeekProvider
         from robotframework_ai_assistant.providers.google_provider import GoogleProvider
         from robotframework_ai_assistant.providers.ollama_provider import OllamaProvider
         from robotframework_ai_assistant.providers.openai_provider import OpenAIProvider
+        from robotframework_ai_assistant.providers.qwen_provider import QwenProvider
 
         cls.register_provider("openai", OpenAIProvider)
         cls.register_provider("anthropic", AnthropicProvider)
         cls.register_provider("google", GoogleProvider)
         cls.register_provider("azure", AzureOpenAIProvider)
         cls.register_provider("ollama", OllamaProvider)
+        cls.register_provider("deepseek", DeepSeekProvider)
+        cls.register_provider("qwen", QwenProvider)
 
     @classmethod
     def get_available_providers(cls) -> list[str]:

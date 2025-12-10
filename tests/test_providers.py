@@ -19,6 +19,8 @@ class TestLLMProviderFactory:
         assert "google" in providers
         assert "azure" in providers
         assert "ollama" in providers
+        assert "deepseek" in providers
+        assert "qwen" in providers
 
     def test_create_openai_provider(self):
         """Test creating OpenAI provider."""
@@ -212,3 +214,101 @@ class TestOllamaProvider:
 
         provider = OllamaProvider()
         assert provider.provider_name == "ollama"
+
+
+class TestDeepSeekProvider:
+    """Tests for DeepSeek provider."""
+
+    def test_provider_initialization(self):
+        """Test DeepSeek provider initialization."""
+        from robotframework_ai_assistant.providers.deepseek_provider import DeepSeekProvider
+
+        provider = DeepSeekProvider(
+            model_name="deepseek-chat",
+            api_key="test-key",
+        )
+        assert provider.model_name == "deepseek-chat"
+        assert provider.api_key == "test-key"
+        assert provider.base_url == "https://api.deepseek.com/v1"
+
+    def test_provider_name(self):
+        """Test provider name."""
+        from robotframework_ai_assistant.providers.deepseek_provider import DeepSeekProvider
+
+        provider = DeepSeekProvider(api_key="test-key")
+        assert provider.provider_name == "deepseek"
+
+    def test_default_env_var(self):
+        """Test default environment variable."""
+        from robotframework_ai_assistant.providers.deepseek_provider import DeepSeekProvider
+
+        provider = DeepSeekProvider(api_key="test-key")
+        assert provider.default_env_var == "DEEPSEEK_API_KEY"
+
+    @patch("langchain_openai.ChatOpenAI")
+    def test_get_llm(self, mock_chat_openai):
+        """Test getting LLM instance."""
+        from robotframework_ai_assistant.providers.deepseek_provider import DeepSeekProvider
+
+        mock_llm = MagicMock()
+        mock_chat_openai.return_value = mock_llm
+
+        provider = DeepSeekProvider(model_name="deepseek-chat", api_key="test-key")
+        llm = provider.get_llm()
+
+        assert llm == mock_llm
+        mock_chat_openai.assert_called_once_with(
+            model="deepseek-chat",
+            temperature=0.7,
+            api_key="test-key",
+            base_url="https://api.deepseek.com/v1",
+        )
+
+
+class TestQwenProvider:
+    """Tests for Qwen provider."""
+
+    def test_provider_initialization(self):
+        """Test Qwen provider initialization."""
+        from robotframework_ai_assistant.providers.qwen_provider import QwenProvider
+
+        provider = QwenProvider(
+            model_name="qwen-turbo",
+            api_key="test-key",
+        )
+        assert provider.model_name == "qwen-turbo"
+        assert provider.api_key == "test-key"
+        assert provider.base_url == "https://dashscope.aliyuncs.com/compatible-mode/v1"
+
+    def test_provider_name(self):
+        """Test provider name."""
+        from robotframework_ai_assistant.providers.qwen_provider import QwenProvider
+
+        provider = QwenProvider(api_key="test-key")
+        assert provider.provider_name == "qwen"
+
+    def test_default_env_var(self):
+        """Test default environment variable."""
+        from robotframework_ai_assistant.providers.qwen_provider import QwenProvider
+
+        provider = QwenProvider(api_key="test-key")
+        assert provider.default_env_var == "DASHSCOPE_API_KEY"
+
+    @patch("langchain_openai.ChatOpenAI")
+    def test_get_llm(self, mock_chat_openai):
+        """Test getting LLM instance."""
+        from robotframework_ai_assistant.providers.qwen_provider import QwenProvider
+
+        mock_llm = MagicMock()
+        mock_chat_openai.return_value = mock_llm
+
+        provider = QwenProvider(model_name="qwen-turbo", api_key="test-key")
+        llm = provider.get_llm()
+
+        assert llm == mock_llm
+        mock_chat_openai.assert_called_once_with(
+            model="qwen-turbo",
+            temperature=0.7,
+            api_key="test-key",
+            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        )

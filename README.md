@@ -56,6 +56,16 @@ export AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com
 #### Ollama (Local Models)
 No API key needed. Requires Ollama running locally on http://localhost:11434
 
+#### DeepSeek
+```bash
+export DEEPSEEK_API_KEY=your-api-key
+```
+
+#### Qwen (Alibaba Cloud)
+```bash
+export DASHSCOPE_API_KEY=your-api-key
+```
+
 ### Optional Dependencies
 
 For providers other than OpenAI, install additional packages:
@@ -66,6 +76,8 @@ pip install langchain-anthropic
 
 # For Google Gemini
 pip install langchain-google-genai
+
+# DeepSeek, Qwen, Azure, and Ollama use built-in dependencies
 ```
 
 ## Usage
@@ -142,6 +154,34 @@ Generate Data With Local Model
     Log    ${users}
 ```
 
+#### Using DeepSeek
+
+```robotframework
+*** Settings ***
+Library    AIAssistantLibrary
+...        provider=deepseek
+...        model_name=deepseek-chat
+
+*** Test Cases ***
+Generate Test Cases With DeepSeek
+    ${tests}=    Generate Test Cases    User authentication    functional    robot    3
+    Log    ${tests}
+```
+
+#### Using Qwen (Alibaba Cloud)
+
+```robotframework
+*** Settings ***
+Library    AIAssistantLibrary
+...        provider=qwen
+...        model_name=qwen-turbo
+
+*** Test Cases ***
+Generate Data With Qwen
+    ${orders}=    Generate Test Data    order    count=5
+    Log    ${orders}
+```
+
 ### With JIRA Integration
 
 ```robotframework
@@ -200,6 +240,18 @@ rf-ai-server
 export LLM_PROVIDER=anthropic
 export LLM_MODEL=claude-3-opus-20240229
 export ANTHROPIC_API_KEY=your-key
+rf-ai-server
+
+# DeepSeek
+export LLM_PROVIDER=deepseek
+export LLM_MODEL=deepseek-chat
+export DEEPSEEK_API_KEY=your-key
+rf-ai-server
+
+# Qwen
+export LLM_PROVIDER=qwen
+export LLM_MODEL=qwen-turbo
+export DASHSCOPE_API_KEY=your-key
 rf-ai-server
 
 # Or with custom host/port

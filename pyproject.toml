@@ -56,6 +56,16 @@ dev = [
     "mypy>=1.7.0",
     "httpx>=0.25.0",
 ]
+anthropic = [
+    "langchain-anthropic>=0.1.0",
+]
+google = [
+    "langchain-google-genai>=0.0.5",
+]
+all-providers = [
+    "langchain-anthropic>=0.1.0",
+    "langchain-google-genai>=0.0.5",
+]
 
 [project.urls]
 Homepage = "https://github.com/ychgh/robotframework-ai-assisstant"

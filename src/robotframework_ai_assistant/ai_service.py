@@ -1,51 +1,82 @@
 """AI Service for generating test data, test cases, and reports using LangChain."""
 
-import os
 from typing import Any, Optional
 
 from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
+
+from robotframework_ai_assistant.providers.factory import LLMProviderFactory
 
 load_dotenv()
 
 
 class AIService:
-    """Service for AI-powered test automation features using LangChain."""
+    """Service for AI-powered test automation features using LangChain.
+
+    Supports multiple LLM providers including OpenAI, Anthropic (Claude), Google (Gemini),
+    Azure OpenAI, and Ollama for local models.
+    """
 
     def __init__(
         self,
+        provider: str = "openai",
         model_name: str = "gpt-4",
         temperature: float = 0.7,
         api_key: Optional[str] = None,
+        **provider_kwargs: Any,
     ):
         """Initialize the AI service.
 
         Args:
-            model_name: The OpenAI model to use.
-            temperature: The temperature for generation.
-            api_key: Optional API key, defaults to OPENAI_API_KEY env var.
+            provider: LLM provider name ('openai', 'anthropic', 'google', 'azure', 'ollama').
+            model_name: Model name for the selected provider.
+            temperature: Temperature for generation (0.0 to 1.0).
+            api_key: API key for the provider. Defaults to provider-specific env var.
+            **provider_kwargs: Additional provider-specific parameters
+                (e.g., azure_endpoint for Azure, base_url for Ollama).
+
+        Examples:
+            # OpenAI (default)
+            service = AIService(provider="openai", model_name="gpt-4")
+
+            # Anthropic Claude
+            service = AIService(provider="anthropic", model_name="claude-3-opus-20240229")
+
+            # Google Gemini
+            service = AIService(provider="google", model_name="gemini-pro")
+
+            # Azure OpenAI
+            service = AIService(
+                provider="azure",
+                model_name="my-deployment",
+                azure_endpoint="https://my-resource.openai.azure.com"
+            )
+
+            # Ollama (local)
+            service = AIService(provider="ollama", model_name="llama2", base_url="http://localhost:11434")
         """
-        self.api_key = api_key or os.getenv("OPENAI_API_KEY")
+        self.provider_name = provider
         self.model_name = model_name
         self.temperature = temperature
-        self._llm: Optional[ChatOpenAI] = None
+        self.api_key = api_key
+        self.provider_kwargs = provider_kwargs
+
+        self._provider = LLMProviderFactory.create_provider(
+            provider=provider,
+            model_name=model_name,
+            temperature=temperature,
+            api_key=api_key,
+            **provider_kwargs,
+        )
 
     @property
-    def llm(self) -> ChatOpenAI:
-        """Get or create the LLM instance."""
-        if self._llm is None:
-            if not self.api_key:
-                raise ValueError(
-                    "OpenAI API key is required. Set OPENAI_API_KEY environment variable "
-                    "or pass api_key parameter."
-                )
-            self._llm = ChatOpenAI(
-                model=self.model_name,
-                temperature=self.temperature,
-                api_key=self.api_key,
-            )
-        return self._llm
+    def llm(self) -> Any:
+        """Get or create the LLM instance.
+
+        Returns:
+            LangChain-compatible LLM instance from the configured provider.
+        """
+        return self._provider.get_llm()
 
     def generate_test_data(
         self,

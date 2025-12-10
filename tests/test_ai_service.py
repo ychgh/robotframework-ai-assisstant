@@ -13,14 +13,16 @@ class TestAIService:
 
     def test_service_initialization(self):
         """Test AI service initialization."""
-        service = AIService(api_key="test-key")
+        service = AIService(provider="openai", api_key="test-key")
         assert service.api_key == "test-key"
         assert service.model_name == "gpt-4"
         assert service.temperature == 0.7
+        assert service.provider_name == "openai"
 
     def test_service_initialization_custom_params(self):
         """Test AI service initialization with custom parameters."""
         service = AIService(
+            provider="openai",
             api_key="test-key",
             model_name="gpt-3.5-turbo",
             temperature=0.5,
@@ -28,21 +30,32 @@ class TestAIService:
         assert service.model_name == "gpt-3.5-turbo"
         assert service.temperature == 0.5
 
-    def test_llm_property_raises_without_key(self):
-        """Test that accessing LLM without API key raises error."""
-        service = AIService()
-        service.api_key = None
+    def test_service_initialization_anthropic(self):
+        """Test AI service initialization with Anthropic provider."""
+        service = AIService(
+            provider="anthropic",
+            model_name="claude-3-opus-20240229",
+            api_key="test-key",
+        )
+        assert service.provider_name == "anthropic"
+        assert service.model_name == "claude-3-opus-20240229"
 
-        with pytest.raises(ValueError, match="OpenAI API key is required"):
+    @patch("robotframework_ai_assistant.providers.openai_provider.ChatOpenAI")
+    def test_llm_property_raises_without_key(self, mock_chat_openai):
+        """Test that accessing LLM without API key raises error."""
+        service = AIService(provider="openai")
+        service._provider.api_key = None
+
+        with pytest.raises(ValueError, match="API key is required"):
             _ = service.llm
 
-    @patch("robotframework_ai_assistant.ai_service.ChatOpenAI")
+    @patch("robotframework_ai_assistant.providers.openai_provider.ChatOpenAI")
     def test_llm_property_creates_instance(self, mock_chat_openai):
         """Test that LLM instance is created correctly."""
         mock_llm = MagicMock()
         mock_chat_openai.return_value = mock_llm
 
-        service = AIService(api_key="test-key")
+        service = AIService(provider="openai", api_key="test-key")
         llm = service.llm
 
         assert llm == mock_llm
@@ -52,13 +65,13 @@ class TestAIService:
             api_key="test-key",
         )
 
-    @patch("robotframework_ai_assistant.ai_service.ChatOpenAI")
+    @patch("robotframework_ai_assistant.providers.openai_provider.ChatOpenAI")
     def test_llm_property_caches_instance(self, mock_chat_openai):
         """Test that LLM instance is cached."""
         mock_llm = MagicMock()
         mock_chat_openai.return_value = mock_llm
 
-        service = AIService(api_key="test-key")
+        service = AIService(provider="openai", api_key="test-key")
         llm1 = service.llm
         llm2 = service.llm
 
@@ -66,7 +79,7 @@ class TestAIService:
         assert mock_chat_openai.call_count == 1
 
     @patch("robotframework_ai_assistant.ai_service.ChatPromptTemplate")
-    @patch("robotframework_ai_assistant.ai_service.ChatOpenAI")
+    @patch("robotframework_ai_assistant.providers.openai_provider.ChatOpenAI")
     def test_generate_test_data(self, mock_chat_openai, mock_prompt_class):
         """Test generate_test_data method with mocked LLM."""
         # Setup mock response
@@ -88,14 +101,14 @@ class TestAIService:
         mock_llm = MagicMock()
         mock_chat_openai.return_value = mock_llm
 
-        service = AIService(api_key="test-key")
+        service = AIService(provider="openai", api_key="test-key")
         result = service.generate_test_data("user", count=1)
 
         assert len(result) == 1
         assert result[0]["name"] == "Test User"
 
     @patch("robotframework_ai_assistant.ai_service.ChatPromptTemplate")
-    @patch("robotframework_ai_assistant.ai_service.ChatOpenAI")
+    @patch("robotframework_ai_assistant.providers.openai_provider.ChatOpenAI")
     def test_generate_test_data_handles_code_block(self, mock_chat_openai, mock_prompt_class):
         """Test that code blocks are handled in response."""
         mock_response = MagicMock()
@@ -113,14 +126,14 @@ class TestAIService:
         mock_llm = MagicMock()
         mock_chat_openai.return_value = mock_llm
 
-        service = AIService(api_key="test-key")
+        service = AIService(provider="openai", api_key="test-key")
         result = service.generate_test_data("user", count=1)
 
         assert len(result) == 1
         assert result[0]["name"] == "Test"
 
     @patch("robotframework_ai_assistant.ai_service.ChatPromptTemplate")
-    @patch("robotframework_ai_assistant.ai_service.ChatOpenAI")
+    @patch("robotframework_ai_assistant.providers.openai_provider.ChatOpenAI")
     def test_generate_test_data_handles_invalid_json(self, mock_chat_openai, mock_prompt_class):
         """Test handling of invalid JSON response."""
         mock_response = MagicMock()
@@ -136,14 +149,14 @@ class TestAIService:
         mock_llm = MagicMock()
         mock_chat_openai.return_value = mock_llm
 
-        service = AIService(api_key="test-key")
+        service = AIService(provider="openai", api_key="test-key")
         result = service.generate_test_data("user", count=1)
 
         assert len(result) == 1
         assert "raw_response" in result[0]
 
     @patch("robotframework_ai_assistant.ai_service.ChatPromptTemplate")
-    @patch("robotframework_ai_assistant.ai_service.ChatOpenAI")
+    @patch("robotframework_ai_assistant.providers.openai_provider.ChatOpenAI")
     def test_explore_environment(self, mock_chat_openai, mock_prompt_class):
         """Test explore_environment method with mocked LLM."""
         mock_response = MagicMock()
@@ -165,14 +178,14 @@ class TestAIService:
         mock_llm = MagicMock()
         mock_chat_openai.return_value = mock_llm
 
-        service = AIService(api_key="test-key")
+        service = AIService(provider="openai", api_key="test-key")
         result = service.explore_environment({"url": "https://api.example.com"}, "api")
 
         assert result["summary"] == "Test environment"
         assert len(result["components"]) == 2
 
     @patch("robotframework_ai_assistant.ai_service.ChatPromptTemplate")
-    @patch("robotframework_ai_assistant.ai_service.ChatOpenAI")
+    @patch("robotframework_ai_assistant.providers.openai_provider.ChatOpenAI")
     def test_generate_test_cases(self, mock_chat_openai, mock_prompt_class):
         """Test generate_test_cases method with mocked LLM."""
         mock_response = MagicMock()
@@ -198,14 +211,14 @@ class TestAIService:
         mock_llm = MagicMock()
         mock_chat_openai.return_value = mock_llm
 
-        service = AIService(api_key="test-key")
+        service = AIService(provider="openai", api_key="test-key")
         result = service.generate_test_cases("Login feature", "functional", "robot", 1)
 
         assert len(result) == 1
         assert result[0]["name"] == "Test Login"
 
     @patch("robotframework_ai_assistant.ai_service.ChatPromptTemplate")
-    @patch("robotframework_ai_assistant.ai_service.ChatOpenAI")
+    @patch("robotframework_ai_assistant.providers.openai_provider.ChatOpenAI")
     def test_generate_test_report(self, mock_chat_openai, mock_prompt_class):
         """Test generate_test_report method with mocked LLM."""
         mock_response = MagicMock()
@@ -233,7 +246,7 @@ class TestAIService:
         mock_llm = MagicMock()
         mock_chat_openai.return_value = mock_llm
 
-        service = AIService(api_key="test-key")
+        service = AIService(provider="openai", api_key="test-key")
         result = service.generate_test_report(
             [{"name": "Test1", "status": "passed"}],
             "summary",
@@ -244,7 +257,7 @@ class TestAIService:
         assert result["statistics"]["pass_rate"] == "80%"
 
     @patch("robotframework_ai_assistant.ai_service.ChatPromptTemplate")
-    @patch("robotframework_ai_assistant.ai_service.ChatOpenAI")
+    @patch("robotframework_ai_assistant.providers.openai_provider.ChatOpenAI")
     def test_analyze_for_jira(self, mock_chat_openai, mock_prompt_class):
         """Test analyze_for_jira method with mocked LLM."""
         mock_response = MagicMock()
@@ -268,7 +281,7 @@ class TestAIService:
         mock_llm = MagicMock()
         mock_chat_openai.return_value = mock_llm
 
-        service = AIService(api_key="test-key")
+        service = AIService(provider="openai", api_key="test-key")
         result = service.analyze_for_jira(
             [{"test": "Login", "error": "Timeout"}],
             "PROJ",

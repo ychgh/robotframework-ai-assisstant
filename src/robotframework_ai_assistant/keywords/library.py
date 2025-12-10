@@ -28,17 +28,37 @@ class AIAssistantLibrary:
 
     = Configuration =
 
-    The library requires an OpenAI API key, which can be provided in two ways:
-    1. Set the ``OPENAI_API_KEY`` environment variable
-    2. Pass ``api_key`` when importing the library
+    The library supports multiple LLM providers. Configure using ``provider`` and ``model_name`` parameters.
 
-    = Example =
+    *Supported Providers:*
+    - ``openai``: OpenAI GPT models (gpt-4, gpt-4-turbo, gpt-3.5-turbo)
+    - ``anthropic``: Anthropic Claude models (claude-3-opus, claude-3-sonnet)
+    - ``google``: Google Gemini models (gemini-pro)
+    - ``azure``: Azure OpenAI (requires azure_endpoint)
+    - ``ollama``: Local models via Ollama (requires ollama running)
 
-    | Library | AIAssistantLibrary | api_key=${API_KEY} |
+    *API Key Configuration:*
+    - Set provider-specific environment variable (OPENAI_API_KEY, ANTHROPIC_API_KEY, etc.)
+    - Or pass ``api_key`` when importing the library
 
-    Or using environment variable:
+    = Examples =
 
-    | Library | AIAssistantLibrary |
+    Using OpenAI (default):
+    | Library | AIAssistantLibrary | provider=openai | model_name=gpt-4 |
+
+    Using Anthropic Claude:
+    | Library | AIAssistantLibrary | provider=anthropic | model_name=claude-3-opus-20240229 |
+    | ...     | api_key=${ANTHROPIC_KEY} |
+
+    Using Google Gemini:
+    | Library | AIAssistantLibrary | provider=google | model_name=gemini-pro |
+
+    Using Azure OpenAI:
+    | Library | AIAssistantLibrary | provider=azure | model_name=my-deployment |
+    | ...     | azure_endpoint=https://my-resource.openai.azure.com |
+
+    Using Ollama (local):
+    | Library | AIAssistantLibrary | provider=ollama | model_name=llama2 |
 
     = JIRA Integration =
 
@@ -52,33 +72,40 @@ class AIAssistantLibrary:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        provider: str = "openai",
         model_name: str = "gpt-4",
         temperature: float = 0.7,
+        api_key: Optional[str] = None,
         jira_url: Optional[str] = None,
         jira_username: Optional[str] = None,
         jira_api_token: Optional[str] = None,
         xray_client_id: Optional[str] = None,
         xray_client_secret: Optional[str] = None,
         zephyr_api_token: Optional[str] = None,
+        **provider_kwargs: Any,
     ):
         """Initialize the AI Assistant Library.
 
         Args:
-            api_key: OpenAI API key. Defaults to OPENAI_API_KEY env var.
-            model_name: OpenAI model to use. Defaults to 'gpt-4'.
-            temperature: Generation temperature. Defaults to 0.7.
+            provider: LLM provider ('openai', 'anthropic', 'google', 'azure', 'ollama'). Defaults to 'openai'.
+            model_name: Model name for the provider. Defaults to 'gpt-4' for OpenAI.
+            temperature: Generation temperature (0.0-1.0). Defaults to 0.7.
+            api_key: API key for the provider. Defaults to provider-specific env var.
             jira_url: JIRA instance URL for integration.
             jira_username: JIRA username/email for integration.
             jira_api_token: JIRA API token for integration.
             xray_client_id: Xray Cloud client ID.
             xray_client_secret: Xray Cloud client secret.
             zephyr_api_token: Zephyr Scale API token.
+            **provider_kwargs: Additional provider-specific parameters
+                (e.g., azure_endpoint for Azure, base_url for Ollama).
         """
         self._ai_service = AIService(
+            provider=provider,
             model_name=model_name,
             temperature=temperature,
             api_key=api_key,
+            **provider_kwargs,
         )
 
         self._jira_client: Optional[JiraClient] = None

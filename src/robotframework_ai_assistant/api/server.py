@@ -38,8 +38,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize AI service
-ai_service = AIService()
+# Initialize AI service with configuration from environment
+ai_service = AIService(
+    provider=os.getenv("LLM_PROVIDER", "openai"),
+    model_name=os.getenv("LLM_MODEL", "gpt-4"),
+    temperature=float(os.getenv("LLM_TEMPERATURE", "0.7")),
+)
 
 
 # ==================== Request/Response Models ====================

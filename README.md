@@ -28,38 +28,118 @@ pip install -e .
 
 ## Configuration
 
-Set your OpenAI API key as an environment variable:
+### LLM Provider Configuration
 
+The library supports multiple LLM providers. Choose based on your needs:
+
+#### OpenAI (Default)
 ```bash
 export OPENAI_API_KEY=your-api-key
 ```
 
-Or provide it when importing the library in Robot Framework.
+#### Anthropic Claude
+```bash
+export ANTHROPIC_API_KEY=your-api-key
+```
+
+#### Google Gemini
+```bash
+export GOOGLE_API_KEY=your-api-key
+```
+
+#### Azure OpenAI
+```bash
+export AZURE_OPENAI_API_KEY=your-api-key
+export AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com
+```
+
+#### Ollama (Local Models)
+No API key needed. Requires Ollama running locally on http://localhost:11434
+
+### Optional Dependencies
+
+For providers other than OpenAI, install additional packages:
+
+```bash
+# For Anthropic Claude
+pip install langchain-anthropic
+
+# For Google Gemini
+pip install langchain-google-genai
+```
 
 ## Usage
 
 ### As a Robot Framework Library
 
+#### Using OpenAI (Default)
+
 ```robotframework
 *** Settings ***
-Library    AIAssistantLibrary    api_key=${API_KEY}
+Library    AIAssistantLibrary
 
 *** Test Cases ***
 Generate User Test Data
     ${users}=    Generate Test Data    user    count=5
     Log    Generated ${users}
+```
 
-Generate Login Test Cases
+#### Using Anthropic Claude
+
+```robotframework
+*** Settings ***
+Library    AIAssistantLibrary
+...        provider=anthropic
+...        model_name=claude-3-opus-20240229
+...        api_key=${ANTHROPIC_KEY}
+
+*** Test Cases ***
+Generate Test Cases With Claude
     ${tests}=    Generate Test Cases    User login with email and password    functional    robot    5
     Log    ${tests}
+```
 
-Explore API Environment
+#### Using Google Gemini
+
+```robotframework
+*** Settings ***
+Library    AIAssistantLibrary
+...        provider=google
+...        model_name=gemini-pro
+
+*** Test Cases ***
+Explore API With Gemini
     ${analysis}=    Explore Test Environment    {"url": "https://api.example.com", "type": "REST"}    api
     Log    ${analysis}
+```
 
-Generate Test Report
+#### Using Azure OpenAI
+
+```robotframework
+*** Settings ***
+Library    AIAssistantLibrary
+...        provider=azure
+...        model_name=my-gpt4-deployment
+...        azure_endpoint=https://my-resource.openai.azure.com
+
+*** Test Cases ***
+Generate Test Report With Azure
     ${report}=    Generate Test Report    [{"name": "Test1", "status": "passed"}]    summary
     Log    ${report}
+```
+
+#### Using Ollama (Local Models)
+
+```robotframework
+*** Settings ***
+Library    AIAssistantLibrary
+...        provider=ollama
+...        model_name=llama2
+
+*** Test Cases ***
+Generate Data With Local Model
+    ${users}=    Generate Test Data    user    count=3
+    Log    ${users}
 ```
 
 ### With JIRA Integration
@@ -113,11 +193,17 @@ Create Test Cycle
 The library can run as a standalone FastAPI server:
 
 ```bash
-# Start the server
+# Start the server (default: OpenAI with gpt-4)
+rf-ai-server
+
+# Configure provider via environment variables
+export LLM_PROVIDER=anthropic
+export LLM_MODEL=claude-3-opus-20240229
+export ANTHROPIC_API_KEY=your-key
 rf-ai-server
 
 # Or with custom host/port
-HOST=0.0.0.0 PORT=8080 rf-ai-server
+HOST=0.0.0.0 PORT=8080 LLM_PROVIDER=google LLM_MODEL=gemini-pro rf-ai-server
 ```
 
 ### API Endpoints

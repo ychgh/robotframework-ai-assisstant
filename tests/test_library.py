@@ -18,8 +18,17 @@ class TestAIAssistantLibrary:
 
     def test_library_initialization_with_api_key(self):
         """Test that library can be initialized with API key."""
-        library = AIAssistantLibrary(api_key="test-key")
+        library = AIAssistantLibrary(provider="openai", api_key="test-key")
         assert library._ai_service.api_key == "test-key"
+
+    def test_library_initialization_with_anthropic(self):
+        """Test that library can be initialized with Anthropic provider."""
+        library = AIAssistantLibrary(
+            provider="anthropic",
+            model_name="claude-3-opus-20240229",
+            api_key="test-key",
+        )
+        assert library._ai_service.provider_name == "anthropic"
 
     def test_library_initialization_with_jira(self):
         """Test that library can be initialized with JIRA credentials."""

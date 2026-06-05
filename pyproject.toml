@@ -1,0 +1,97 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "robotframework-ai-assistant"
+version = "0.1.0"
+description = "AI-driven automation library for Robot Framework with test data generation, environment exploration, test case generation, and integrations with JIRA/XRAY/Zephyr"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Robot Framework AI Assistant Team"}
+]
+keywords = [
+    "robotframework",
+    "testing",
+    "automation",
+    "ai",
+    "langchain",
+    "test-generation"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Robot Framework",
+    "Framework :: Robot Framework :: Library",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "robotframework>=6.0",
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "langchain>=0.1.0",
+    "langchain-openai>=0.0.5",
+    "langchain-community>=0.0.13",
+    "pydantic>=2.0.0",
+    "httpx>=0.25.0",
+    "python-dotenv>=1.0.0",
+    "jinja2>=3.1.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+    "ruff>=0.1.0",
+    "mypy>=1.7.0",
+    "httpx>=0.25.0",
+]
+anthropic = [
+    "langchain-anthropic>=0.1.0",
+]
+google = [
+    "langchain-google-genai>=0.0.5",
+]
+all-providers = [
+    "langchain-anthropic>=0.1.0",
+    "langchain-google-genai>=0.0.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/ychgh/robotframework-ai-assisstant"
+Repository = "https://github.com/ychgh/robotframework-ai-assisstant"
+Issues = "https://github.com/ychgh/robotframework-ai-assisstant/issues"
+
+[project.scripts]
+rf-ai-server = "robotframework_ai_assistant.api.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "B", "C4", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true

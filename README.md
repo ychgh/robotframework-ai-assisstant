@@ -374,7 +374,18 @@ ruff format src/ tests/
 | `Add Test To Zephyr Cycle` | Add a test to a cycle |
 | `Update Zephyr Execution` | Update execution status |
 
+## Other reference to consider
+
+robotframework-browser
+https://github.com/MarketSquare/robotframework-browser.git
+
+    it is powered by Playwright, propelling browser automation into the future.
+
+
+
 ## License
 
 Apache License 2.0 - see [LICENSE](LICENSE) for details.
+
+
 
